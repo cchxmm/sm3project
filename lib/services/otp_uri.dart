@@ -126,7 +126,7 @@ class OtpUri {
       final digitsQ = params['digits'];
       if (digitsQ != null) {
         final d = int.tryParse(digitsQ.trim());
-        if (d == 6 || d == 7 || d == 8) digits = d;
+        if (d != null && (d == 6 || d == 7 || d == 8)) digits = d;
       }
 
       var period = 30;
