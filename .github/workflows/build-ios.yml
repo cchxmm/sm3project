@@ -5,12 +5,15 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   build-ipa:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -22,14 +25,20 @@ jobs:
         run: flutter pub get
 
       - name: Generate iOS platform files
-        run: flutter create --platforms=ios .
+        run: flutter create --platforms=ios --project-name=otp_authenticator .
 
-      - name: Build IPA (no codesign)
-        run: flutter build ipa --release --no-codesign
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign --no-tree-shake-icons
+
+      - name: Package IPA
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r otp_authenticator.ipa Payload
 
       - name: Upload IPA artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: otp-authenticator-ipa
-          path: build/ios/ipa/*.ipa
+          path: otp_authenticator.ipa
           retention-days: 30
